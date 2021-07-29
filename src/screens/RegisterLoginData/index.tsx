@@ -36,7 +36,7 @@ export function RegisterLoginData() {
     formState: {
       errors
     }
-  } = useForm();
+  } = useForm({resolver: yupResolver(schema)});
 
   async function handleRegister(formData: FormData) {
     const newLoginData = {
@@ -44,7 +44,21 @@ export function RegisterLoginData() {
       ...formData
     }
 
-    // Save data on AsyncStorage
+   try{
+      const dataKey = '@passmanager:logins';
+
+      const data = await AsyncStorage.getItem(dataKey);
+      const currentData = data ? JSON.parse(data) : [];
+      const dataFormatted = [
+          ...currentData,
+          newLoginData
+      ]
+
+     await AsyncStorage.setItem(dataKey, JSON.stringify(dataFormatted));
+      reset()
+   }catch (e){
+      Alert.alert('Erro')
+   }
   }
 
   return (
@@ -61,7 +75,7 @@ export function RegisterLoginData() {
             title="Título"
             name="title"
             error={
-              // message error here
+             errors.title && errors.title.message
             }
             control={control}
             placeholder="Escreva o título aqui"
@@ -72,7 +86,7 @@ export function RegisterLoginData() {
             title="Email"
             name="email"
             error={
-              // message error here
+              errors.email && errors.email.message
             }
             control={control}
             placeholder="Escreva o Email aqui"
@@ -84,7 +98,7 @@ export function RegisterLoginData() {
             title="Senha"
             name="password"
             error={
-              // message error here
+              errors.password && errors.password.message
             }
             control={control}
             secureTextEntry
